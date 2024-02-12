@@ -27,7 +27,7 @@ public class CategoryTest {
     }
 
     @Test
-    public void shouldRaiseAnErrorWhenNameIsNotValid() {
+    public void shouldRaiseAnErrorWhenNameIsNull() {
         final String expectedName = null;
         final var expectedErrorMessage = "'name' should not be null";
         final var expectedErrorCount = 1;
@@ -35,8 +35,58 @@ public class CategoryTest {
         final var expectedIsActive = true;
 
         final Category category = Category.createCategory(expectedName, expectedDescription, expectedIsActive);
-
         final var raisedException = Assertions.assertThrows(DomainException.class, () -> category.validate(new ThrowsValidationHandler()));
+
+        Assertions.assertEquals(expectedErrorCount, raisedException.getErrors().size());
+        Assertions.assertEquals(expectedErrorMessage, raisedException.getErrors().get(0).message());
+    }
+
+    @Test
+    public void shouldRaiseAnErrorWhenNameIsEmpty() {
+        final String expectedName = "";
+        final var expectedErrorMessage = "'name' should not be empty";
+        final var expectedErrorCount = 1;
+        final var expectedDescription = "Category Description";
+        final var expectedIsActive = true;
+
+        final Category category = Category.createCategory(expectedName, expectedDescription, expectedIsActive);
+        final var raisedException = Assertions.assertThrows(DomainException.class, () -> category.validate(new ThrowsValidationHandler()));
+
+        Assertions.assertEquals(expectedErrorCount, raisedException.getErrors().size());
+        Assertions.assertEquals(expectedErrorMessage, raisedException.getErrors().get(0).message());
+    }
+
+    @Test
+    public void shouldRaiseAnErrorWhenNameIsLessThan3() {
+        final String expectedName = "Na ";
+        final var expectedErrorMessage = "'name' must be between 3 and 255 characters";
+        final var expectedErrorCount = 1;
+        final var expectedDescription = "Category Description";
+        final var expectedIsActive = true;
+
+        final Category category = Category.createCategory(expectedName, expectedDescription, expectedIsActive);
+        final var raisedException = Assertions.assertThrows(DomainException.class, () -> category.validate(new ThrowsValidationHandler()));
+
+        Assertions.assertEquals(expectedErrorCount, raisedException.getErrors().size());
+        Assertions.assertEquals(expectedErrorMessage, raisedException.getErrors().get(0).message());
+    }
+
+    @Test
+    public void shouldRaiseAnErrorWhenNameIsMoreThan255() {
+        final String expectedName = """
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eu finibus turpis, sed mollis massa. 
+                Ut hendrerit risus leo, ac luctus ipsum tempor ut. Etiam in justo ac odio rhoncus ultrices. 
+                Cras non dui eget orci sodales posuere. Aliquam sagittis sed risus ut lobortis. Fusce sagittis semper 
+                augue.
+                """;
+        final var expectedErrorMessage = "'name' must be between 3 and 255 characters";
+        final var expectedErrorCount = 1;
+        final var expectedDescription = "Category Description";
+        final var expectedIsActive = true;
+
+        final Category category = Category.createCategory(expectedName, expectedDescription, expectedIsActive);
+        final var raisedException = Assertions.assertThrows(DomainException.class, () -> category.validate(new ThrowsValidationHandler()));
+
         Assertions.assertEquals(expectedErrorCount, raisedException.getErrors().size());
         Assertions.assertEquals(expectedErrorMessage, raisedException.getErrors().get(0).message());
     }
