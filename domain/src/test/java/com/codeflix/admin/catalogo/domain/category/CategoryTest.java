@@ -138,6 +138,7 @@ public class CategoryTest {
         final var expectedIsActive = false;
 
         final Category orignalCategory = Category.createCategory(expectedName, expectedDescription, true);
+        final var createdAt = orignalCategory.getCreatedAt();
         final var updatedAt = orignalCategory.getUpdatedAt();
 
         Assertions.assertTrue(orignalCategory.isActive());
@@ -150,7 +151,7 @@ public class CategoryTest {
         Assertions.assertEquals(expectedName, category.getName());
         Assertions.assertEquals(expectedDescription, category.getDescription());
         Assertions.assertEquals(expectedIsActive, category.isActive());
-        Assertions.assertNotNull(category.getCreatedAt());
+        Assertions.assertEquals(createdAt, category.getCreatedAt());
         Assertions.assertTrue(category.getUpdatedAt().isAfter(updatedAt));
         Assertions.assertNotNull(category.getDeletedAt());
     }
@@ -162,6 +163,7 @@ public class CategoryTest {
         final var expectedIsActive = true;
 
         final Category orignalCategory = Category.createCategory(expectedName, expectedDescription, false);
+        final var createdAt = orignalCategory.getCreatedAt();
         final var updatedAt = orignalCategory.getUpdatedAt();
 
         Assertions.assertFalse(orignalCategory.isActive());
@@ -174,7 +176,7 @@ public class CategoryTest {
         Assertions.assertEquals(expectedName, category.getName());
         Assertions.assertEquals(expectedDescription, category.getDescription());
         Assertions.assertEquals(expectedIsActive, category.isActive());
-        Assertions.assertNotNull(category.getCreatedAt());
+        Assertions.assertEquals(createdAt, category.getCreatedAt());
         Assertions.assertTrue(category.getUpdatedAt().isAfter(updatedAt));
         Assertions.assertNull(category.getDeletedAt());
     }
