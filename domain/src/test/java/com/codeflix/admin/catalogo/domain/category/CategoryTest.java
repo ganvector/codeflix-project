@@ -90,4 +90,42 @@ public class CategoryTest {
         Assertions.assertEquals(expectedErrorCount, raisedException.getErrors().size());
         Assertions.assertEquals(expectedErrorMessage, raisedException.getErrors().get(0).message());
     }
+
+    @Test
+    public void shouldNotRaiseAnErrorWhenDescriptionIsEmpty() {
+        final String expectedName = "Movies";
+        final var expectedDescription = "   ";
+        final var expectedIsActive = true;
+
+        final Category category = Category.createCategory(expectedName, expectedDescription, expectedIsActive);
+
+        Assertions.assertDoesNotThrow(() -> category.validate(new ThrowsValidationHandler()));
+        Assertions.assertNotNull(category);
+        Assertions.assertNotNull(category.getId());
+        Assertions.assertEquals(expectedName, category.getName());
+        Assertions.assertEquals(expectedDescription, category.getDescription());
+        Assertions.assertEquals(expectedIsActive, category.isActive());
+        Assertions.assertNotNull(category.getCreatedAt());
+        Assertions.assertNotNull(category.getUpdatedAt());
+        Assertions.assertNull(category.getDeletedAt());
+    }
+
+    @Test
+    public void shouldNotRaiseAnErrorWhenActiveIsFalse() {
+        final String expectedName = "Movies";
+        final var expectedDescription = "Planet's best movies in one place";
+        final var expectedIsActive = false;
+
+        final Category category = Category.createCategory(expectedName, expectedDescription, expectedIsActive);
+
+        Assertions.assertDoesNotThrow(() -> category.validate(new ThrowsValidationHandler()));
+        Assertions.assertNotNull(category);
+        Assertions.assertNotNull(category.getId());
+        Assertions.assertEquals(expectedName, category.getName());
+        Assertions.assertEquals(expectedDescription, category.getDescription());
+        Assertions.assertEquals(expectedIsActive, category.isActive());
+        Assertions.assertNotNull(category.getCreatedAt());
+        Assertions.assertNotNull(category.getUpdatedAt());
+        Assertions.assertNotNull(category.getDeletedAt());
+    }
 }
