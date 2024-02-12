@@ -1,12 +1,11 @@
 package com.codeflix.admin.catalogo.domain.category;
 
+import com.codeflix.admin.catalogo.domain.AggregateRoot;
+
 import java.time.Instant;
 import java.util.UUID;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Category {
-    private String id;
+public class Category extends AggregateRoot<CategoryID> {
     private String name;
     private String description;
     private boolean active;
@@ -15,21 +14,21 @@ public class Category {
     private Instant deletedAt;
 
     private Category(
-            String id,
-            String name,
-            String description,
-            boolean active,
-            Instant createdAt,
-            Instant updatedAt,
-            Instant deletedAt
+            CategoryID anId,
+            String aName,
+            String aDescription,
+            boolean isActive,
+            Instant aCreationDate,
+            Instant anUpdateDate,
+            Instant aDeleteDate
     ) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.active = active;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.deletedAt = deletedAt;
+        super(anId);
+        this.name = aName;
+        this.description = aDescription;
+        this.active = isActive;
+        this.createdAt = aCreationDate;
+        this.updatedAt = anUpdateDate;
+        this.deletedAt = aDeleteDate;
     }
 
     public static Category createCategory(
@@ -37,13 +36,9 @@ public class Category {
             final String aDescription,
             final boolean aIsActive
     ) {
-        final var id = UUID.randomUUID().toString();
+        final var id = CategoryID.generateUnique();
         var now = Instant.now();
         return new Category(id, aName, aDescription, aIsActive, now, now, null);
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getName() {
