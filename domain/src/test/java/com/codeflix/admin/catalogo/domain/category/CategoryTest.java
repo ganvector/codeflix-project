@@ -1,6 +1,8 @@
 package com.codeflix.admin.catalogo.domain.category;
 
 import com.codeflix.admin.catalogo.domain.category.Category;
+import com.codeflix.admin.catalogo.domain.exceptions.DomainException;
+import com.codeflix.admin.catalogo.domain.validation.handlers.ThrowsValidationHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -34,8 +36,8 @@ public class CategoryTest {
 
         final Category category = Category.createCategory(expectedName, expectedDescription, expectedIsActive);
 
-        final var raisedException = Assertions.assertThrows(DomainException.class, () -> category.validate());
-        Assertions.assertEquals(expectedErrorCount, raisedException.getErrors().size);
-        Assertions.assertEquals(expectedErrorMessage, raisedException.getErrors().get(0).getMessage());
+        final var raisedException = Assertions.assertThrows(DomainException.class, () -> category.validate(new ThrowsValidationHandler()));
+        Assertions.assertEquals(expectedErrorCount, raisedException.getErrors().size());
+        Assertions.assertEquals(expectedErrorMessage, raisedException.getErrors().get(0).message());
     }
 }
