@@ -34,6 +34,24 @@
                     <finalName>application</finalName>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>8.2.0</version>
+                <dependencies>
+                    <!--TODO trying to discover some way to use default properties and environment variables at the same time -->
+                    <dependency>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-core</artifactId>
+                        <version>8.2.0</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <url>jdbc:mysql://localhost:3306/adm_videos</url>
+                    <user>root</user>
+                    <password>123456</password>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
