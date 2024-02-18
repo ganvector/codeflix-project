@@ -26,7 +26,10 @@ public class CategoryMySQLGateway implements CategoryGateway {
 
     @Override
     public void deleteById(CategoryID anCategoryID) {
-
+        final var idValue = anCategoryID.getValue();
+        if (this.repository.existsById(idValue)) {
+            this.repository.deleteById(idValue);
+        }
     }
 
     @Override
@@ -37,7 +40,6 @@ public class CategoryMySQLGateway implements CategoryGateway {
     @Override
     public Category update(final Category aCategory) {
         return this.save(aCategory);
-
     }
 
     @Override
