@@ -1,12 +1,9 @@
 package com.codeflix.admin.catalogo.domain.category;
 
-import com.codeflix.admin.catalogo.domain.category.Category;
 import com.codeflix.admin.catalogo.domain.exceptions.DomainException;
 import com.codeflix.admin.catalogo.domain.validation.handlers.ThrowsValidationHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.time.Instant;
 
 public class CategoryTest {
 
