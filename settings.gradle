@@ -1,0 +1,4 @@
+rootProject.name = "admin-catalogo"
+include(":infrastructure")
+include(":application")
+include(":domain")
