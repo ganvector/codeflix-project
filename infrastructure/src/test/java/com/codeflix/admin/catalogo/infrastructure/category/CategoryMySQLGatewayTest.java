@@ -1,12 +1,10 @@
 package com.codeflix.admin.catalogo.infrastructure.category;
 
 import com.codeflix.admin.catalogo.domain.category.Category;
+import com.codeflix.admin.catalogo.domain.category.CategoryID;
 import com.codeflix.admin.catalogo.infrastructure.category.persistence.CategoryJPAEntity;
 import com.codeflix.admin.catalogo.infrastructure.category.persistence.CategoryRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.ComponentScan;
@@ -30,7 +28,7 @@ public class CategoryMySQLGatewayTest {
     }
 
     @Test
-    @DescriptorKey("Should return a new category when calls create")
+    @DisplayName("Should return a new category when calls create")
     void shouldReturnANewCategoryWhenCallsCreate() {
         final var expectedName = "Movies";
         final var expectedDescription = "Universe's best movies";
@@ -66,13 +64,15 @@ public class CategoryMySQLGatewayTest {
     }
 
     @Test
-    @DescriptorKey("Should return an updated category when calls update")
+    @DisplayName("Should return an updated category when calls update")
     void shouldReturnAnUpdatedCategoryWhenCallUpdate() {
         final var expectedName = "Movies";
         final var expectedDescription = "Universe's best movies";
         final var expectedIsActive = true;
 
         final Category aCategory = Category.createCategory("Films", "", expectedIsActive);
+
+        Assertions.assertEquals(0, categoryRepository.count());
 
         categoryRepository.saveAndFlush(CategoryJPAEntity.create(aCategory));
 
@@ -107,6 +107,38 @@ public class CategoryMySQLGatewayTest {
         Assertions.assertTrue(aCategory.getUpdatedAt().isBefore(categoryEntity.getUpdatedAt()));
         Assertions.assertEquals(aCategory.getDeletedAt(), categoryEntity.getDeletedAt());
         Assertions.assertNull(categoryEntity.getDeletedAt());
+    }
+
+    @Test
+    @DisplayName("Should delete a pre persisted category")
+    void shouldDeleteAPrePersistedCategory() {
+        final var aCategory = Category.createCategory("Movies", "", true);
+
+        Assertions.assertEquals(0, categoryRepository.count());
+
+        categoryRepository.saveAndFlush(CategoryJPAEntity.create(aCategory));
+
+        Assertions.assertEquals(1, categoryRepository.count());
+
+        categoryGateway.deleteById(aCategory.getId());
+
+        Assertions.assertEquals(0, categoryRepository.count());
+    }
+
+    @Test
+    @DisplayName("Should not delete a pre persisted category when id is invalid")
+    void shouldNotDeleteAPrePersistedCategoryWhenIdIsInvalid() {
+        final var aCategory = Category.createCategory("Movies", "", true);
+
+        Assertions.assertEquals(0, categoryRepository.count());
+
+        categoryRepository.saveAndFlush(CategoryJPAEntity.create(aCategory));
+
+        Assertions.assertEquals(1, categoryRepository.count());
+
+        categoryGateway.deleteById(CategoryID.load("invalid"));
+
+        Assertions.assertEquals(1, categoryRepository.count());
     }
 
 }
