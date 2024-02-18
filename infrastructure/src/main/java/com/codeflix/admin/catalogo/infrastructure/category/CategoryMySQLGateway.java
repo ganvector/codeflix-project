@@ -20,8 +20,8 @@ public class CategoryMySQLGateway implements CategoryGateway {
     }
 
     @Override
-    public Category create(Category aCategory) {
-        return this.repository.save(CategoryJPAEntity.create(aCategory)).toAggregate();
+    public Category create(final Category aCategory) {
+        return this.save(aCategory);
     }
 
     @Override
@@ -35,12 +35,17 @@ public class CategoryMySQLGateway implements CategoryGateway {
     }
 
     @Override
-    public Category update(Category aCategory) {
-        return null;
+    public Category update(final Category aCategory) {
+        return this.save(aCategory);
+
     }
 
     @Override
     public Pagination<Category> findAll(CategorySearchQuery sQuery) {
         return null;
+    }
+
+    private Category save(final Category aCategory) {
+        return this.repository.save(CategoryJPAEntity.create(aCategory)).toAggregate();
     }
 }
