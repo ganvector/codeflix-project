@@ -52,8 +52,6 @@ public class GetCategoryByIdUseCaseTest {
         Assertions.assertEquals(aCategory.getCreatedAt(), output.createdAt());
         Assertions.assertEquals(aCategory.getUpdatedAt(), output.updatedAt());
         Assertions.assertEquals(aCategory.getDeletedAt(), output.deletedAt());
-
-
     }
 
     @Test
@@ -79,7 +77,6 @@ public class GetCategoryByIdUseCaseTest {
     @DisplayName("should return an exception when gateway throws exception")
     public void shouldThrowAnErrorWhenGatewayThrows() {
         final var expectedErrorMessage = "Gateway Error";
-        final var expectedErrorCount = 1;
         final var expectedId = CategoryID.load("123");
 
         Mockito
