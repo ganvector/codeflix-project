@@ -1,4 +1,4 @@
-package com.codeflix.admin.catalogo.infrastructure.category;
+package com.codeflix.admin.catalogo;
 
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.ComponentScan;
