@@ -1,5 +1,6 @@
 package com.codeflix.admin.catalogo.infrastructure.category;
 
+import com.codeflix.admin.catalogo.MySQLGatewayTest;
 import com.codeflix.admin.catalogo.domain.category.Category;
 import com.codeflix.admin.catalogo.domain.category.CategoryID;
 import com.codeflix.admin.catalogo.domain.category.CategorySearchQuery;
@@ -7,12 +8,7 @@ import com.codeflix.admin.catalogo.infrastructure.category.persistence.CategoryJ
 import com.codeflix.admin.catalogo.infrastructure.category.persistence.CategoryRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.test.context.ActiveProfiles;
 
-import javax.management.DescriptorKey;
 import java.util.List;
 
 @MySQLGatewayTest

@@ -1,14 +1,12 @@
 package com.codeflix.admin.catalogo.infrastructure.category.persistence;
 
 import com.codeflix.admin.catalogo.domain.category.Category;
-import com.codeflix.admin.catalogo.infrastructure.category.MySQLGatewayTest;
+import com.codeflix.admin.catalogo.MySQLGatewayTest;
 import org.hibernate.PropertyValueException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-
-import javax.management.DescriptorKey;
 
 @MySQLGatewayTest
 public class CategoryRepositoryTest {
