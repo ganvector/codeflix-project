@@ -1,4 +1,4 @@
-package com.codeflix.admin.catalogo.infrastructure.models;
+package com.codeflix.admin.catalogo.infrastructure.category.models;
 
 import com.codeflix.admin.catalogo.JacksonTest;
 import com.codeflix.admin.catalogo.infrastructure.category.models.CategoryResponse;
