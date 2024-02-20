@@ -4,12 +4,11 @@ import com.codeflix.admin.catalogo.IntegrationTest;
 import com.codeflix.admin.catalogo.domain.category.Category;
 import com.codeflix.admin.catalogo.domain.category.CategoryGateway;
 import com.codeflix.admin.catalogo.domain.category.CategoryID;
-import com.codeflix.admin.catalogo.domain.exceptions.DomainException;
+import com.codeflix.admin.catalogo.domain.exceptions.NotFoundException;
 import com.codeflix.admin.catalogo.infrastructure.category.persistence.CategoryJPAEntity;
 import com.codeflix.admin.catalogo.infrastructure.category.persistence.CategoryRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,7 @@ public class GetCategoryByIdUseCaseIT {
         final var expectedId = CategoryID.load("123");
 
         final var actualException = Assertions.assertThrows(
-                DomainException.class, () -> getCategoryByIdUseCase.execute(expectedId.getValue())
+                NotFoundException.class, () -> getCategoryByIdUseCase.execute(expectedId.getValue())
         );
 
         Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());

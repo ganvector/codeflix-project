@@ -3,7 +3,7 @@ package com.codeflix.admin.catalogo.application.category.retrieve.get;
 import com.codeflix.admin.catalogo.domain.category.Category;
 import com.codeflix.admin.catalogo.domain.category.CategoryGateway;
 import com.codeflix.admin.catalogo.domain.category.CategoryID;
-import com.codeflix.admin.catalogo.domain.exceptions.DomainException;
+import com.codeflix.admin.catalogo.domain.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -66,7 +66,7 @@ public class GetCategoryByIdUseCaseTest {
                 .thenReturn(Optional.empty());
 
         final var actualException = Assertions.assertThrows(
-                DomainException.class, () -> getCategoryByIdUseCase.execute(expectedId.getValue())
+                NotFoundException.class, () -> getCategoryByIdUseCase.execute(expectedId.getValue())
         );
 
         Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
