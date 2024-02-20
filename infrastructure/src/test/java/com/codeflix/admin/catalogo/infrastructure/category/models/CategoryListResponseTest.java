@@ -21,7 +21,6 @@ class CategoryListResponseTest {
         final var expectedDescription = "Universe's best movies";
         final var expectedIsActive = false;
         final var expectedCreatedAt = Instant.now();
-        final var expectedUpdatedAt = Instant.now();
         final var expectedDeletedAt = Instant.now();
 
         final var response = new CategoryListResponse(
