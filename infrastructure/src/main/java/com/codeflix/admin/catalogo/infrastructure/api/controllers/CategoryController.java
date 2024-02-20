@@ -5,15 +5,18 @@ import com.codeflix.admin.catalogo.application.category.create.CreateCategoryOut
 import com.codeflix.admin.catalogo.application.category.create.CreateCategoryUseCase;
 import com.codeflix.admin.catalogo.application.category.delete.DeleteCategoryUseCase;
 import com.codeflix.admin.catalogo.application.category.retrieve.get.GetCategoryByIdUseCase;
+import com.codeflix.admin.catalogo.application.category.retrieve.list.ListCategoriesUseCase;
 import com.codeflix.admin.catalogo.application.category.update.UpdateCategoryCommand;
 import com.codeflix.admin.catalogo.application.category.update.UpdateCategoryOutput;
 import com.codeflix.admin.catalogo.application.category.update.UpdateCategoryUseCase;
+import com.codeflix.admin.catalogo.domain.category.CategorySearchQuery;
 import com.codeflix.admin.catalogo.domain.pagination.Pagination;
 import com.codeflix.admin.catalogo.domain.validation.handlers.Notification;
 import com.codeflix.admin.catalogo.infrastructure.api.CategoryAPI;
-import com.codeflix.admin.catalogo.infrastructure.category.models.CategoryApiOutput;
-import com.codeflix.admin.catalogo.infrastructure.category.models.CreateCategoryApiInput;
-import com.codeflix.admin.catalogo.infrastructure.category.models.UpdateCategoryApiInput;
+import com.codeflix.admin.catalogo.infrastructure.category.models.CategoryResponse;
+import com.codeflix.admin.catalogo.infrastructure.category.models.CategoryListResponse;
+import com.codeflix.admin.catalogo.infrastructure.category.models.CreateCategoryRequest;
+import com.codeflix.admin.catalogo.infrastructure.category.models.UpdateCategoryRequest;
 import com.codeflix.admin.catalogo.infrastructure.category.presenters.CategoryApiPresenter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,21 +32,24 @@ public class CategoryController implements CategoryAPI {
     private final GetCategoryByIdUseCase getCategoryByIdUseCase;
     private final UpdateCategoryUseCase updateCategoryUseCase;
     private final DeleteCategoryUseCase deleteCategoryUseCase;
+    private final ListCategoriesUseCase listCategoriesUseCase;
 
     public CategoryController(
             final CreateCategoryUseCase createCategoryUseCase,
             final GetCategoryByIdUseCase getCategoryByIdUseCase,
             final UpdateCategoryUseCase updateCategoryUseCase,
-            final DeleteCategoryUseCase deleteCategoryUseCase
+            final DeleteCategoryUseCase deleteCategoryUseCase,
+            final ListCategoriesUseCase listCategoriesUseCase
     ) {
         this.createCategoryUseCase = Objects.requireNonNull(createCategoryUseCase);
         this.getCategoryByIdUseCase = Objects.requireNonNull(getCategoryByIdUseCase);
         this.updateCategoryUseCase = Objects.requireNonNull(updateCategoryUseCase);
         this.deleteCategoryUseCase = Objects.requireNonNull(deleteCategoryUseCase);
+        this.listCategoriesUseCase = Objects.requireNonNull(listCategoriesUseCase);
     }
 
     @Override
-    public ResponseEntity<?> createCategory(CreateCategoryApiInput input) {
+    public ResponseEntity<?> createCategory(CreateCategoryRequest input) {
         final var aCommand = CreateCategoryCommand.create(
                 input.name(),
                 input.description(),
@@ -60,17 +66,23 @@ public class CategoryController implements CategoryAPI {
     }
 
     @Override
-    public Pagination<?> listCategories(String search, int page, int perPage, String sort, String direction) {
-        return null;
+    public Pagination<CategoryListResponse> listCategories(
+            final String search,
+            final int page,
+            final int perPage,
+            final String sort,
+            final String direction
+    ) {
+        return this.listCategoriesUseCase.execute(new CategorySearchQuery(page, perPage, search, sort, direction)).map(CategoryApiPresenter::present);
     }
 
     @Override
-    public CategoryApiOutput getById(final String id) {
+    public CategoryResponse getById(final String id) {
         return CategoryApiPresenter.present(this.getCategoryByIdUseCase.execute(id));
     }
 
     @Override
-    public ResponseEntity<?> updateById(final String id, final UpdateCategoryApiInput input) {
+    public ResponseEntity<?> updateById(final String id, final UpdateCategoryRequest input) {
         final var aCommand = UpdateCategoryCommand.create(
                 id,
                 input.name(),

@@ -6,16 +6,19 @@ import com.codeflix.admin.catalogo.application.category.create.CreateCategoryUse
 import com.codeflix.admin.catalogo.application.category.delete.DeleteCategoryUseCase;
 import com.codeflix.admin.catalogo.application.category.retrieve.get.GetCategoryByIdOutput;
 import com.codeflix.admin.catalogo.application.category.retrieve.get.GetCategoryByIdUseCase;
+import com.codeflix.admin.catalogo.application.category.retrieve.list.ListCategoriesOutput;
+import com.codeflix.admin.catalogo.application.category.retrieve.list.ListCategoriesUseCase;
 import com.codeflix.admin.catalogo.application.category.update.UpdateCategoryOutput;
 import com.codeflix.admin.catalogo.application.category.update.UpdateCategoryUseCase;
 import com.codeflix.admin.catalogo.domain.category.Category;
 import com.codeflix.admin.catalogo.domain.category.CategoryID;
 import com.codeflix.admin.catalogo.domain.exceptions.DomainException;
 import com.codeflix.admin.catalogo.domain.exceptions.NotFoundException;
+import com.codeflix.admin.catalogo.domain.pagination.Pagination;
 import com.codeflix.admin.catalogo.domain.validation.Error;
 import com.codeflix.admin.catalogo.domain.validation.handlers.Notification;
-import com.codeflix.admin.catalogo.infrastructure.category.models.CreateCategoryApiInput;
-import com.codeflix.admin.catalogo.infrastructure.category.models.UpdateCategoryApiInput;
+import com.codeflix.admin.catalogo.infrastructure.category.models.CreateCategoryRequest;
+import com.codeflix.admin.catalogo.infrastructure.category.models.UpdateCategoryRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.API;
 import org.hamcrest.Matchers;
@@ -29,6 +32,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.List;
 import java.util.Objects;
 
 @ControllerTest(controllers = CategoryAPI.class)
@@ -52,13 +56,16 @@ public class CategoryAPITest {
     @MockBean
     private DeleteCategoryUseCase deleteCategoryUseCase;
 
+    @MockBean
+    private ListCategoriesUseCase listCategoriesUseCase;
+
     @Test
     public void shouldCreateACategoryWhenAllInputsAreValid() throws Exception {
         final var expectedName = "Movies";
         final var expectedDescription = "The universe's best movies";
         final var expectedIsActive = true;
 
-        final var aInput = new CreateCategoryApiInput(expectedName, expectedDescription, expectedIsActive);
+        final var aInput = new CreateCategoryRequest(expectedName, expectedDescription, expectedIsActive);
 
         Mockito
                 .when(createCategoryUseCase.execute(Mockito.any()))
@@ -88,7 +95,7 @@ public class CategoryAPITest {
         final var expectedIsActive = true;
         final var expectedMessage = "'name' should not be null";
 
-        final var aInput = new CreateCategoryApiInput(expectedName, expectedDescription, expectedIsActive);
+        final var aInput = new CreateCategoryRequest(expectedName, expectedDescription, expectedIsActive);
 
         Mockito
                 .when(createCategoryUseCase.execute(Mockito.any()))
@@ -120,7 +127,7 @@ public class CategoryAPITest {
         final var expectedIsActive = true;
         final var expectedMessage = "'name' should not be null";
 
-        final var aInput = new CreateCategoryApiInput(expectedName, expectedDescription, expectedIsActive);
+        final var aInput = new CreateCategoryRequest(expectedName, expectedDescription, expectedIsActive);
 
         Mockito
                 .when(createCategoryUseCase.execute(Mockito.any()))
@@ -203,7 +210,7 @@ public class CategoryAPITest {
         final var expectedIsActive = true;
         final var expectedId = "valid_id";
 
-        final var anInput = new UpdateCategoryApiInput(expectedName, expectedDescription, expectedIsActive);
+        final var anInput = new UpdateCategoryRequest(expectedName, expectedDescription, expectedIsActive);
 
         Mockito
                 .when(updateCategoryUseCase.execute(Mockito.any()))
@@ -236,7 +243,7 @@ public class CategoryAPITest {
         final var expectedIsActive = true;
         final var expectedErrorMessage = "Category with ID not_found was not found";
 
-        final var anInput = new UpdateCategoryApiInput(expectedName, expectedDescription, expectedIsActive);
+        final var anInput = new UpdateCategoryRequest(expectedName, expectedDescription, expectedIsActive);
 
         Mockito
                 .when(updateCategoryUseCase.execute(Mockito.any()))
@@ -270,7 +277,7 @@ public class CategoryAPITest {
         final var expectedErrorMessage = "'name' should not be null";
         final var expectedErrorCount = 1;
 
-        final var anInput = new UpdateCategoryApiInput(expectedName, expectedDescription, expectedIsActive);
+        final var anInput = new UpdateCategoryRequest(expectedName, expectedDescription, expectedIsActive);
 
         Mockito
                 .when(updateCategoryUseCase.execute(Mockito.any()))
@@ -314,5 +321,58 @@ public class CategoryAPITest {
         Mockito
                 .verify(deleteCategoryUseCase, Mockito.times(1))
                 .execute(Mockito.eq(expectedId));
+    }
+
+    @Test
+    public void shouldReturnCategoriesWhenGivenValidParameters() throws Exception {
+        final var aCategory = Category.createCategory("Movies", "Universe's best movies", true);
+        final var expectedPage = 0;
+        final var expectedPerPage = 10;
+        final var expectedTerms = "Movies";
+        final var expectedSort = "description";
+        final var expectedDirection = "desc";
+        final var expectedItemsCount = 1;
+        final var expectedTotal = 1;
+
+        final var expectedItems = List.of(ListCategoriesOutput.create(aCategory));
+
+        Mockito.when(listCategoriesUseCase.execute(Mockito.any())).thenReturn(new Pagination<>(
+                expectedPage,
+                expectedPerPage,
+                expectedTotal,
+                expectedItems
+        ));
+
+        final var request =  MockMvcRequestBuilders.get("/categories/")
+                .queryParam("page", String.valueOf(expectedPage))
+                .queryParam("perPage", String.valueOf(expectedPerPage))
+                .queryParam("sort", expectedSort)
+                .queryParam("dir", expectedDirection)
+                .queryParam("search", expectedTerms)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        final var response = this.mvc.perform(request)
+                .andDo(MockMvcResultHandlers.print());
+
+        response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.current_page", Matchers.equalTo(expectedPage)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.per_page", Matchers.equalTo(expectedPerPage)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total", Matchers.equalTo(expectedTotal)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items", Matchers.hasSize(expectedItemsCount)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].id", Matchers.equalTo(aCategory.getId().getValue())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].name", Matchers.equalTo(aCategory.getName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].description", Matchers.equalTo(aCategory.getDescription())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].is_active", Matchers.equalTo(aCategory.isActive())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].created_at", Matchers.equalTo(aCategory.getCreatedAt().toString())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].deleted_at", Matchers.equalTo(aCategory.getDeletedAt())));
+
+        Mockito.verify(listCategoriesUseCase, Mockito.times(1)).execute(Mockito.argThat(query ->
+            Objects.equals(expectedPage, query.page())
+            && Objects.equals(expectedPerPage, query.perPage())
+            && Objects.equals(expectedTerms, query.terms())
+            && Objects.equals(expectedSort, query.sort())
+            && Objects.equals(expectedDirection, query.direction())
+        ));
+
     }
 }

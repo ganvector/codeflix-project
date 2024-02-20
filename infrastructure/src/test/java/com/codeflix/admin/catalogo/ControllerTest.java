@@ -1,6 +1,8 @@
 package com.codeflix.admin.catalogo;
 
+import com.codeflix.admin.catalogo.infrastructure.config.ObjectMapperConfig;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -13,6 +15,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @ActiveProfiles("test")
 @WebMvcTest
+@Import(ObjectMapperConfig.class)
 public @interface ControllerTest {
 
     @AliasFor(annotation = WebMvcTest.class, attribute = "controllers")

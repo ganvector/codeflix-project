@@ -14,7 +14,7 @@ public record ListCategoriesOutput(
         Instant updatedAt,
         Instant deletedAt
 ) {
-    static ListCategoriesOutput create(final Category aCategory) {
+    public static ListCategoriesOutput create(final Category aCategory) {
         return new ListCategoriesOutput(
             aCategory.getId(),
             aCategory.getName(),
