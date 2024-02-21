@@ -7,6 +7,7 @@ import com.codeflix.admin.catalogo.domain.validation.handlers.ThrowsValidationHa
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GenreTest {
@@ -220,5 +221,124 @@ public class GenreTest {
 
         Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
         Assertions.assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+    }
+
+    @Test
+    public void shouldUpdateAGenreWithNullCategories() {
+        final var expectedName = "Action";
+        final var expectedIsActive = true;
+        final var expectedCategoriesSize = 0;
+        final var expectedCategoryList = new ArrayList<CategoryID>();
+
+        final var aGenre = Genre.createGenre("Horror", expectedIsActive);
+
+        Assertions.assertTrue(aGenre.isActive());
+        Assertions.assertEquals(aGenre.getCreatedAt(), aGenre.getUpdatedAt());
+        Assertions.assertNull(aGenre.getDeletedAt());
+
+        aGenre.update(expectedName, expectedIsActive, null);
+
+        Assertions.assertEquals(expectedName, aGenre.getName());
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertEquals(expectedCategoriesSize, aGenre.getCategories().size());
+        Assertions.assertEquals(expectedCategoryList, aGenre.getCategories());
+        Assertions.assertNotNull(aGenre.getCreatedAt());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNull(aGenre.getDeletedAt());
+    }
+
+    @Test
+    public void shouldAddANewCategoryToEmptyCategoryAGenre() {
+        CategoryID seriesID = CategoryID.load("series");
+        CategoryID moviesID = CategoryID.load("movies");
+
+        final var expectedName = "Action";
+        final var expectedIsActive = true;
+        final var expectedCategoryList = List.of(seriesID, moviesID);
+
+        final var aGenre = Genre.createGenre(expectedName, expectedIsActive);
+
+        Assertions.assertEquals(0, aGenre.getCategories().size());
+
+        aGenre.addCategory(seriesID);
+        aGenre.addCategory(moviesID);
+
+        Assertions.assertEquals(expectedName, aGenre.getName());
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertEquals(expectedCategoryList, aGenre.getCategories());
+        Assertions.assertNotNull(aGenre.getCreatedAt());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNull(aGenre.getDeletedAt());
+    }
+
+    @Test
+    public void shouldRemoveANewCategoryFromAGenre() {
+        CategoryID seriesID = CategoryID.load("series");
+        CategoryID moviesID = CategoryID.load("movies");
+
+        final var expectedName = "Action";
+        final var expectedIsActive = true;
+        final var expectedCategoryList = List.of(moviesID);
+
+        final var aGenre = Genre.createGenre(expectedName, expectedIsActive);
+        aGenre.update(expectedName, expectedIsActive, List.of(seriesID, moviesID));
+
+        Assertions.assertEquals(2, aGenre.getCategories().size());
+
+        aGenre.removeCategory(seriesID);
+
+        Assertions.assertEquals(expectedName, aGenre.getName());
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertEquals(expectedCategoryList, aGenre.getCategories());
+        Assertions.assertNotNull(aGenre.getCreatedAt());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNull(aGenre.getDeletedAt());
+    }
+
+    @Test
+    public void shouldDoNothingWhenAddingANullCategoryToEmptyCategoryAGenre() {
+        CategoryID moviesID = CategoryID.load("movies");
+
+        final var expectedName = "Action";
+        final var expectedIsActive = true;
+        final var expectedCategoryList = List.of(moviesID);
+
+        final var aGenre = Genre.createGenre(expectedName, expectedIsActive);
+
+        Assertions.assertEquals(0, aGenre.getCategories().size());
+
+        aGenre.addCategory(null);
+        aGenre.addCategory(moviesID);
+
+        Assertions.assertEquals(expectedName, aGenre.getName());
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertEquals(expectedCategoryList, aGenre.getCategories());
+        Assertions.assertNotNull(aGenre.getCreatedAt());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNull(aGenre.getDeletedAt());
+    }
+
+    @Test
+    public void shouldDoNothingWhenRemovingANullCategoryToEmptyCategoryAGenre() {
+        CategoryID seriesID = CategoryID.load("series");
+        CategoryID moviesID = CategoryID.load("movies");
+
+        final var expectedName = "Action";
+        final var expectedIsActive = true;
+        final var expectedCategoryList = List.of(seriesID, moviesID);
+
+        final var aGenre = Genre.createGenre(expectedName, expectedIsActive);
+        aGenre.update(expectedName, expectedIsActive, expectedCategoryList);
+
+        Assertions.assertEquals(2, aGenre.getCategories().size());
+
+        aGenre.removeCategory(null);
+
+        Assertions.assertEquals(expectedName, aGenre.getName());
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertEquals(expectedCategoryList, aGenre.getCategories());
+        Assertions.assertNotNull(aGenre.getCreatedAt());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNull(aGenre.getDeletedAt());
     }
 }
