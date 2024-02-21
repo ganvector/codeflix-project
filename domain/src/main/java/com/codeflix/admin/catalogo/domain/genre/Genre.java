@@ -3,12 +3,12 @@ package com.codeflix.admin.catalogo.domain.genre;
 import com.codeflix.admin.catalogo.domain.AggregateRoot;
 import com.codeflix.admin.catalogo.domain.category.CategoryID;
 import com.codeflix.admin.catalogo.domain.exceptions.NotificationException;
+import com.codeflix.admin.catalogo.domain.utils.InstantUtils;
 import com.codeflix.admin.catalogo.domain.validation.ValidationHandler;
 import com.codeflix.admin.catalogo.domain.validation.handlers.Notification;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Genre extends AggregateRoot<GenreID> {
@@ -48,7 +48,7 @@ public class Genre extends AggregateRoot<GenreID> {
 
     public static Genre createGenre(final String aName, final boolean isActive) {
         final var anId = GenreID.generateUnique();
-        final var now = Instant.now();
+        final var now = InstantUtils.now();
         return new Genre(anId, aName, isActive, new ArrayList<>(), now, now, isActive ? null : now);
     }
 
@@ -62,6 +62,23 @@ public class Genre extends AggregateRoot<GenreID> {
             final Instant aDeletedAt
     ) {
         return new Genre(anId, aName, isActive, categories, aCreatedAt, anUpdatedAt, aDeletedAt);
+    }
+
+    public Genre deactivate() {
+        if (deletedAt == null) {
+            this.deletedAt = InstantUtils.now();
+        }
+
+        this.active = false;
+        this.updatedAt = InstantUtils.now();
+        return this;
+    }
+
+    public Genre activate() {
+        this.deletedAt = null;
+        this.active = true;
+        this.updatedAt = InstantUtils.now();
+        return this;
     }
 
     @Override
@@ -84,20 +101,12 @@ public class Genre extends AggregateRoot<GenreID> {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public boolean isActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     public List<CategoryID> getCategories() {
-        return Collections.unmodifiableList(this.categories);
+        return categories;
     }
 
     private void setCategories(List<CategoryID> categories) {
@@ -108,23 +117,11 @@ public class Genre extends AggregateRoot<GenreID> {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public Instant getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
     public Instant getDeletedAt() {
         return deletedAt;
-    }
-
-    public void setDeletedAt(Instant deletedAt) {
-        this.deletedAt = deletedAt;
     }
 }
