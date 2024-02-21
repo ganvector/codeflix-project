@@ -1,7 +1,7 @@
 package com.codeflix.admin.catalogo.application.category.retrieve.list;
 
 import com.codeflix.admin.catalogo.domain.category.CategoryGateway;
-import com.codeflix.admin.catalogo.domain.category.CategorySearchQuery;
+import com.codeflix.admin.catalogo.domain.pagination.SearchQuery;
 import com.codeflix.admin.catalogo.domain.pagination.Pagination;
 
 import java.util.Objects;
@@ -14,7 +14,7 @@ public class DefaultListCategoriesUseCase extends ListCategoriesUseCase{
     }
 
     @Override
-    public Pagination<ListCategoriesOutput> execute(CategorySearchQuery query) {
+    public Pagination<ListCategoriesOutput> execute(SearchQuery query) {
         return this.categoryGateway.findAll(query).map(ListCategoriesOutput::create);
     }
 }

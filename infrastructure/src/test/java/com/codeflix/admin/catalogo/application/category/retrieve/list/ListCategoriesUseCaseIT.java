@@ -3,18 +3,16 @@ package com.codeflix.admin.catalogo.application.category.retrieve.list;
 import com.codeflix.admin.catalogo.IntegrationTest;
 import com.codeflix.admin.catalogo.domain.category.Category;
 import com.codeflix.admin.catalogo.domain.category.CategoryGateway;
-import com.codeflix.admin.catalogo.domain.category.CategorySearchQuery;
+import com.codeflix.admin.catalogo.domain.pagination.SearchQuery;
 import com.codeflix.admin.catalogo.domain.pagination.Pagination;
 import com.codeflix.admin.catalogo.infrastructure.category.persistence.CategoryJPAEntity;
 import com.codeflix.admin.catalogo.infrastructure.category.persistence.CategoryRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -57,7 +55,7 @@ public class ListCategoriesUseCaseIT {
         final var expectedTotal = 0;
 
 
-        final var aQuery = new CategorySearchQuery(
+        final var aQuery = new SearchQuery(
                 expectedPage, expectedPerPage, expectedTerms, expectedSort, expectedDirection
         );
 
@@ -96,7 +94,7 @@ public class ListCategoriesUseCaseIT {
         final var expectedDirection = "asc";
 
 
-        final var aQuery = new CategorySearchQuery(
+        final var aQuery = new SearchQuery(
                 expectedPage, expectedPerPage, expectedTerms, expectedSort, expectedDirection
         );
 
@@ -125,7 +123,7 @@ public class ListCategoriesUseCaseIT {
             final long expectedTotal,
             final String expectedCategoryName
     ) {
-        final var aQuery = new CategorySearchQuery(
+        final var aQuery = new SearchQuery(
                 expectedPage, expectedPerPage, "", expectedSort, expectedDirection
         );
 
@@ -154,7 +152,7 @@ public class ListCategoriesUseCaseIT {
     ) {
         final var expectedSort = "name";
         final var expectedDirection = "asc";
-        final var aQuery = new CategorySearchQuery(
+        final var aQuery = new SearchQuery(
                 expectedPage, expectedPerPage, "", expectedSort, expectedDirection
         );
 
