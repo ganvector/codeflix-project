@@ -2,17 +2,21 @@ package com.codeflix.admin.catalogo.e2e.category;
 
 import com.codeflix.admin.catalogo.E2ETest;
 import com.codeflix.admin.catalogo.domain.category.CategoryID;
+import com.codeflix.admin.catalogo.infrastructure.category.models.CategoryListResponse;
 import com.codeflix.admin.catalogo.infrastructure.category.models.CategoryResponse;
 import com.codeflix.admin.catalogo.infrastructure.category.models.CreateCategoryRequest;
 import com.codeflix.admin.catalogo.infrastructure.category.persistence.CategoryRepository;
 import com.codeflix.admin.catalogo.infrastructure.config.json.Json;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MySQLContainer;
@@ -29,6 +33,8 @@ public class CategoryE2ETest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+
+
     @Container
     private static final MySQLContainer MY_SQL_CONTAINER = new MySQLContainer("mysql:8.2.0")
             .withUsername("root")
@@ -40,6 +46,11 @@ public class CategoryE2ETest {
         final var mappedPort = MY_SQL_CONTAINER.getMappedPort(3306);
         System.out.printf("Container is running on port %s\n", mappedPort);
         registry.add("mysql.port", () -> mappedPort);
+    }
+
+    @BeforeEach
+    void cleanUp() {
+        categoryRepository.deleteAll();
     }
 
     @Test
@@ -61,6 +72,85 @@ public class CategoryE2ETest {
         Assertions.assertNotNull(actualCategory.createdAt());
         Assertions.assertNotNull(actualCategory.updatedAt());
         Assertions.assertNull(actualCategory.deletedAt());
+    }
+
+    @Test
+    public void shouldBeAbleToNavigateThroughAllCategories () throws Exception {
+        Assertions.assertTrue(MY_SQL_CONTAINER.isRunning());
+        Assertions.assertEquals(0, categoryRepository.count());
+
+        givenACategory("Movies", "Universe's best movies", true);
+        givenACategory("Series", null, true);
+        givenACategory("Anime", "Best of animation", true);
+
+        listCategories(0, 1)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.current_page", Matchers.equalTo(0)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.per_page", Matchers.equalTo(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total", Matchers.equalTo(3)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].name", Matchers.equalTo("Anime")));
+
+        listCategories(1, 1)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.current_page", Matchers.equalTo(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.per_page", Matchers.equalTo(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total", Matchers.equalTo(3)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].name", Matchers.equalTo("Movies")));
+
+        listCategories(2, 1)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.current_page", Matchers.equalTo(2)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.per_page", Matchers.equalTo(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total", Matchers.equalTo(3)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].name", Matchers.equalTo("Series")));
+
+        listCategories(3, 1)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.current_page", Matchers.equalTo(3)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.per_page", Matchers.equalTo(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total", Matchers.equalTo(3)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items", Matchers.hasSize(0)));
+    }
+
+    @Test
+    public void shouldBeAbleToSearchThroughAllCategories () throws Exception {
+        Assertions.assertTrue(MY_SQL_CONTAINER.isRunning());
+        Assertions.assertEquals(0, categoryRepository.count());
+
+        givenACategory("Movies", "Universe's best movies", true);
+        givenACategory("Series", null, true);
+        givenACategory("Anime", "Best of animation", true);
+
+        listCategories(0, 1, "ovi")
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.current_page", Matchers.equalTo(0)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.per_page", Matchers.equalTo(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total", Matchers.equalTo(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].name", Matchers.equalTo("Movies")));
+    }
+
+    @Test
+    public void shouldBeAbleToSortByDescriptionDescThroughAllCategories () throws Exception {
+        Assertions.assertTrue(MY_SQL_CONTAINER.isRunning());
+        Assertions.assertEquals(0, categoryRepository.count());
+
+        givenACategory("Movies", "Best movies", true);
+        givenACategory("Series", "A new way to binge watch", true);
+        givenACategory("Anime", "From Japan to your house", true);
+
+        listCategories(0, 3, "", "description", "desc")
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.current_page", Matchers.equalTo(0)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.per_page", Matchers.equalTo(3)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total", Matchers.equalTo(3)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items", Matchers.hasSize(3)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].name", Matchers.equalTo("Anime")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[1].name", Matchers.equalTo("Movies")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items[2].name", Matchers.equalTo("Series")));
     }
 
     private CategoryID givenACategory(final String aName, final String aDescription, final boolean isActive) throws Exception {
@@ -88,5 +178,25 @@ public class CategoryE2ETest {
                 .getResponse().getContentAsString();
 
         return Json.readValue(json, CategoryResponse.class);
+    }
+
+    private ResultActions listCategories(final int page, final int perPage, final String search) throws Exception {
+        return listCategories(page, perPage, search, "", "");
+    }
+
+    private ResultActions listCategories(final int page, final int perPage) throws Exception {
+        return listCategories(page, perPage, "", "", "");
+    }
+
+    private ResultActions listCategories(final int page, final int perPage, final String search, final String sort, final String dir) throws Exception {
+        final var aRequest = MockMvcRequestBuilders.get("/categories")
+                .queryParam("page", String.valueOf(page))
+                .queryParam("perPage", String.valueOf(perPage))
+                .queryParam("search", search)
+                .queryParam("sort", sort)
+                .queryParam("dir", dir)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        return this.mvc.perform(aRequest);
     }
 }
