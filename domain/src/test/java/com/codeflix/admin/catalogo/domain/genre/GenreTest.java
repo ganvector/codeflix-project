@@ -1,10 +1,13 @@
 package com.codeflix.admin.catalogo.domain.genre;
 
+import com.codeflix.admin.catalogo.domain.category.CategoryID;
 import com.codeflix.admin.catalogo.domain.exceptions.DomainException;
 import com.codeflix.admin.catalogo.domain.exceptions.NotificationException;
 import com.codeflix.admin.catalogo.domain.validation.handlers.ThrowsValidationHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 public class GenreTest {
 
@@ -106,5 +109,116 @@ public class GenreTest {
         Assertions.assertEquals(expectedIsActive, aGenre.isActive());
         Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
         Assertions.assertNull(aGenre.getDeletedAt());
+    }
+
+    @Test
+    public void shouldUpdateAGenreWithValidParameters () {
+        final var expectedName = "Action";
+        final var expectedIsActive = false;
+        final var expectedCategoriesSize = 1;
+        final var expectedCategories = List.of(CategoryID.load("123"));
+
+        final var aGenre = Genre.createGenre("Horror", true);
+
+        Assertions.assertTrue(aGenre.isActive());
+        Assertions.assertEquals(aGenre.getCreatedAt(), aGenre.getUpdatedAt());
+        Assertions.assertNull(aGenre.getDeletedAt());
+
+        aGenre.update(expectedName, expectedIsActive, expectedCategories);
+
+        Assertions.assertEquals(expectedName, aGenre.getName());
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertEquals(expectedCategoriesSize, aGenre.getCategories().size());
+        Assertions.assertNotNull(aGenre.getCreatedAt());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNotNull(aGenre.getDeletedAt());
+    }
+
+    @Test
+    public void shouldUpdateAndActivateAGenreWithValidParameters () {
+        final var expectedName = "Action";
+        final var expectedIsActive = true;
+        final var expectedCategoriesSize = 1;
+        final var expectedCategories = List.of(CategoryID.load("123"));
+
+        final var aGenre = Genre.createGenre("Horror", false);
+
+        Assertions.assertFalse(aGenre.isActive());
+        Assertions.assertEquals(aGenre.getCreatedAt(), aGenre.getUpdatedAt());
+        Assertions.assertNotNull(aGenre.getDeletedAt());
+
+        aGenre.update(expectedName, expectedIsActive, expectedCategories);
+
+        Assertions.assertEquals(expectedName, aGenre.getName());
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertEquals(expectedCategoriesSize, aGenre.getCategories().size());
+        Assertions.assertNotNull(aGenre.getCreatedAt());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNull(aGenre.getDeletedAt());
+    }
+
+    @Test
+    public void shouldUpdateAndDeactivateAGenreWithValidParameters () {
+        final var expectedName = "Action";
+        final var expectedIsActive = false;
+        final var expectedCategoriesSize = 1;
+        final var expectedCategories = List.of(CategoryID.load("123"));
+
+        final var aGenre = Genre.createGenre("Horror", true);
+
+        Assertions.assertTrue(aGenre.isActive());
+        Assertions.assertEquals(aGenre.getCreatedAt(), aGenre.getUpdatedAt());
+        Assertions.assertNull(aGenre.getDeletedAt());
+
+        aGenre.update(expectedName, expectedIsActive, expectedCategories);
+
+        Assertions.assertEquals(expectedName, aGenre.getName());
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertEquals(expectedCategoriesSize, aGenre.getCategories().size());
+        Assertions.assertNotNull(aGenre.getCreatedAt());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNotNull(aGenre.getDeletedAt());
+    }
+
+    @Test
+    public void shouldReceiveExceptionWhenUpdatingWithNoName () {
+        final String expectedName = null;
+        final var expectedIsActive = true;
+        final var expectedCategories = List.of(CategoryID.load("123"));
+        final var expectedErrorCount = 1;
+        final var expectedErrorMessage = "'name' should not be null";
+
+        final var aGenre = Genre.createGenre("Horror", true);
+
+        Assertions.assertTrue(aGenre.isActive());
+        Assertions.assertEquals(aGenre.getCreatedAt(), aGenre.getUpdatedAt());
+        Assertions.assertNull(aGenre.getDeletedAt());
+
+        final var actualException = Assertions
+                .assertThrows(NotificationException.class, () -> aGenre.update(expectedName, expectedIsActive, expectedCategories));
+
+        Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
+        Assertions.assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+    }
+
+    @Test
+    public void shouldReceiveExceptionWhenUpdatingWithEmptyName () {
+        final String expectedName = "   ";
+        final var expectedIsActive = true;
+        final var expectedCategories = List.of(CategoryID.load("123"));
+        final var expectedErrorCount = 1;
+        final var expectedErrorMessage = "'name' should not be empty";
+
+        final var aGenre = Genre.createGenre("Horror", true);
+
+        Assertions.assertTrue(aGenre.isActive());
+        Assertions.assertEquals(aGenre.getCreatedAt(), aGenre.getUpdatedAt());
+        Assertions.assertNull(aGenre.getDeletedAt());
+
+        final var actualException = Assertions
+                .assertThrows(NotificationException.class, () -> aGenre.update(expectedName, expectedIsActive, expectedCategories));
+
+        Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
+        Assertions.assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
     }
 }
