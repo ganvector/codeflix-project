@@ -38,12 +38,7 @@ public class Genre extends AggregateRoot<GenreID> {
         this.updatedAt = anUpdatedAt;
         this.deletedAt = aDeletedAt;
 
-        final var notification = Notification.create();
-        validate(notification);
-
-        if(notification.hasError()) {
-            throw new NotificationException("", notification);
-        }
+        selfValidate();
     }
 
     public static Genre createGenre(final String aName, final boolean isActive) {
@@ -81,11 +76,32 @@ public class Genre extends AggregateRoot<GenreID> {
         return this;
     }
 
+    public Genre update(
+            final String aName,
+            final boolean isActive,
+            final List<CategoryID> aCategories
+    ) {
+        if (isActive) {
+            activate();
+        } else {
+            deactivate();
+        }
+        this.name = aName;
+        this.categories = new ArrayList<>(aCategories);
+        this.updatedAt = InstantUtils.now();
+
+        selfValidate();
+
+        return this;
+    }
+
+
+
     @Override
     public Genre clone() {
         try {
             var aGenre = (Genre) super.clone();
-            aGenre.setCategories(List.copyOf(this.getCategories()));
+            aGenre.setCategories(new ArrayList<>(aGenre.categories));
             return aGenre;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
@@ -123,5 +139,14 @@ public class Genre extends AggregateRoot<GenreID> {
 
     public Instant getDeletedAt() {
         return deletedAt;
+    }
+
+    private void selfValidate() {
+        final var notification = Notification.create();
+        validate(notification);
+
+        if(notification.hasError()) {
+            throw new NotificationException("", notification);
+        }
     }
 }
