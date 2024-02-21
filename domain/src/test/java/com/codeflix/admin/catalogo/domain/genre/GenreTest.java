@@ -71,4 +71,40 @@ public class GenreTest {
         Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
         Assertions.assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
     }
+
+    @Test
+    public void shouldInactivateAnActiveGenre() {
+        final var expectedName = "Action";
+        final var expectedIsActive = false;
+
+        final var aGenre = Genre.createGenre(expectedName, true);
+
+        Assertions.assertTrue(aGenre.isActive());
+        Assertions.assertEquals(aGenre.getCreatedAt(), aGenre.getUpdatedAt());
+        Assertions.assertNull(aGenre.getDeletedAt());
+
+        aGenre.deactivate();
+
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNotNull(aGenre.getDeletedAt());
+    }
+
+    @Test
+    public void shouldActiveAnInactiveGenre() {
+        final var expectedName = "Action";
+        final var expectedIsActive = true;
+
+        final var aGenre = Genre.createGenre(expectedName, false);
+
+        Assertions.assertFalse(aGenre.isActive());
+        Assertions.assertEquals(aGenre.getCreatedAt(), aGenre.getUpdatedAt());
+        Assertions.assertNotNull(aGenre.getDeletedAt());
+
+        aGenre.activate();
+
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNull(aGenre.getDeletedAt());
+    }
 }
