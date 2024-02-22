@@ -124,13 +124,16 @@ public class Genre extends AggregateRoot<GenreID> {
 
     @Override
     public Genre clone() {
-        try {
-            var aGenre = (Genre) super.clone();
-            aGenre.setCategories(new ArrayList<>(aGenre.categories));
-            return aGenre;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
+        final var anId = GenreID.load(getId().getValue());
+        return new Genre(
+                anId,
+                this.getName(),
+                this.isActive(),
+                new ArrayList<>(this.categories),
+                this.getCreatedAt(),
+                this.getUpdatedAt(),
+                this.getDeletedAt()
+        );
     }
 
     @Override
