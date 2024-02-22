@@ -272,6 +272,49 @@ public class GenreTest {
     }
 
     @Test
+    public void shouldAddANewCategoriesToEmptyCategoryAGenre() {
+        CategoryID seriesID = CategoryID.load("series");
+        CategoryID moviesID = CategoryID.load("movies");
+
+        final var expectedName = "Action";
+        final var expectedIsActive = true;
+        final var expectedCategoryList = List.of(seriesID, moviesID);
+
+        final var aGenre = Genre.createGenre(expectedName, expectedIsActive);
+
+        Assertions.assertEquals(0, aGenre.getCategories().size());
+
+        aGenre.addCategories(expectedCategoryList);
+
+        Assertions.assertEquals(expectedName, aGenre.getName());
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertEquals(expectedCategoryList, aGenre.getCategories());
+        Assertions.assertNotNull(aGenre.getCreatedAt());
+        Assertions.assertTrue(aGenre.getUpdatedAt().isAfter(aGenre.getCreatedAt()));
+        Assertions.assertNull(aGenre.getDeletedAt());
+    }
+
+    @Test
+    public void shouldAddAnEmptyCategoriesToEmptyCategoryAGenre() {
+        final var expectedName = "Action";
+        final var expectedIsActive = true;
+        final var expectedCategoryList = List.<CategoryID>of();
+
+        final var aGenre = Genre.createGenre(expectedName, expectedIsActive);
+
+        Assertions.assertEquals(0, aGenre.getCategories().size());
+
+        aGenre.addCategories(expectedCategoryList);
+
+        Assertions.assertEquals(expectedName, aGenre.getName());
+        Assertions.assertEquals(expectedIsActive, aGenre.isActive());
+        Assertions.assertEquals(expectedCategoryList, aGenre.getCategories());
+        Assertions.assertNotNull(aGenre.getCreatedAt());
+        Assertions.assertNotNull(aGenre.getUpdatedAt());
+        Assertions.assertNull(aGenre.getDeletedAt());
+    }
+
+    @Test
     public void shouldRemoveANewCategoryFromAGenre() {
         CategoryID seriesID = CategoryID.load("series");
         CategoryID moviesID = CategoryID.load("movies");
