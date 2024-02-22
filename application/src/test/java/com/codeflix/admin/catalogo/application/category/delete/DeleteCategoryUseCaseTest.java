@@ -1,5 +1,6 @@
 package com.codeflix.admin.catalogo.application.category.delete;
 
+import com.codeflix.admin.catalogo.application.UseCaseTest;
 import com.codeflix.admin.catalogo.application.category.create.DefaultCreateCategoryUseCase;
 import com.codeflix.admin.catalogo.domain.category.Category;
 import com.codeflix.admin.catalogo.domain.category.CategoryGateway;
@@ -13,8 +14,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
-public class DeleteCategoryUseCaseTest {
+import java.util.List;
+
+public class DeleteCategoryUseCaseTest extends UseCaseTest {
 
     @InjectMocks
     private DefaultDeleteCategoryUseCase deleteCategoryUseCase;
@@ -22,9 +24,8 @@ public class DeleteCategoryUseCaseTest {
     @Mock
     private CategoryGateway categoryGateway;
 
-    @BeforeEach
-    void cleanUp() {
-        Mockito.reset(categoryGateway);
+    public List<Object> getMocks() {
+        return List.of(categoryGateway);
     }
 
     @Test

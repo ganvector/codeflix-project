@@ -1,5 +1,6 @@
 package com.codeflix.admin.catalogo.application.category.update;
 
+import com.codeflix.admin.catalogo.application.UseCaseTest;
 import com.codeflix.admin.catalogo.application.category.create.CreateCategoryCommand;
 import com.codeflix.admin.catalogo.domain.category.Category;
 import com.codeflix.admin.catalogo.domain.category.CategoryGateway;
@@ -14,22 +15,21 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 
-@ExtendWith(MockitoExtension.class)
-public class UpdateCategoryUseCaseTest {
+public class UpdateCategoryUseCaseTest extends UseCaseTest {
     @InjectMocks
     private DefaultUpdateCategoryUseCase useCase;
 
     @Mock
     private CategoryGateway categoryGateway;
 
-    @BeforeEach
-    void cleanUp() {
-        Mockito.reset(categoryGateway);
+    public List<Object> getMocks() {
+        return List.of(categoryGateway);
     }
 
     @Test

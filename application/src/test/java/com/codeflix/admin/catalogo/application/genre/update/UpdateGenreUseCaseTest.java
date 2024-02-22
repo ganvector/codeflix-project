@@ -1,5 +1,6 @@
 package com.codeflix.admin.catalogo.application.genre.update;
 
+import com.codeflix.admin.catalogo.application.UseCaseTest;
 import com.codeflix.admin.catalogo.domain.category.CategoryGateway;
 import com.codeflix.admin.catalogo.domain.category.CategoryID;
 import com.codeflix.admin.catalogo.domain.exceptions.NotificationException;
@@ -19,8 +20,7 @@ import java.util.Optional;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 
-@ExtendWith(MockitoExtension.class)
-public class UpdateGenreUseCaseTest {
+public class UpdateGenreUseCaseTest extends UseCaseTest {
 
     @Mock
     private CategoryGateway categoryGateway;
@@ -30,6 +30,10 @@ public class UpdateGenreUseCaseTest {
 
     @InjectMocks
     private DefaultUpdateGenreUseCase updateGenreUseCase;
+
+    public List<Object> getMocks() {
+        return List.of(genreGateway, categoryGateway);
+    }
 
     @Test
     public void shouldUpdateAGenreWhenGivenAValidCommand() {

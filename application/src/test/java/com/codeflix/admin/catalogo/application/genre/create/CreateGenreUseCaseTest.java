@@ -1,5 +1,6 @@
 package com.codeflix.admin.catalogo.application.genre.create;
 
+import com.codeflix.admin.catalogo.application.UseCaseTest;
 import com.codeflix.admin.catalogo.domain.category.CategoryGateway;
 import com.codeflix.admin.catalogo.domain.category.CategoryID;
 import com.codeflix.admin.catalogo.domain.exceptions.NotificationException;
@@ -7,6 +8,7 @@ import com.codeflix.admin.catalogo.domain.genre.GenreGateway;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -17,8 +19,7 @@ import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import java.util.List;
 import java.util.Objects;
 
-@ExtendWith(MockitoExtension.class)
-public class CreateGenreUseCaseTest {
+public class CreateGenreUseCaseTest extends UseCaseTest {
 
     @Mock
     private GenreGateway genreGateway;
@@ -28,6 +29,10 @@ public class CreateGenreUseCaseTest {
 
     @InjectMocks
     private DefaultCreateGenreUseCase createGenreUseCase;
+
+    public List<Object> getMocks() {
+        return List.of(genreGateway, categoryGateway);
+    }
 
     @Test
     public void shouldReturnGenreIdWhenCallCreateGenreWithValidInput() {
@@ -230,4 +235,6 @@ public class CreateGenreUseCaseTest {
                 .map(CategoryID::getValue)
                 .toList();
     }
+
+
 }
