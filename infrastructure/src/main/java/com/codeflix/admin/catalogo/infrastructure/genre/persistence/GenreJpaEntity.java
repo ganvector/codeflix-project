@@ -6,6 +6,8 @@ import com.codeflix.admin.catalogo.domain.genre.GenreID;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -48,6 +50,7 @@ public class GenreJpaEntity {
         this.id = id;
         this.name = name;
         this.active = active;
+        this.categories = new HashSet<>();
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.deletedAt = deletedAt;
@@ -73,8 +76,7 @@ public class GenreJpaEntity {
                 GenreID.load(getId()),
                 getName(),
                 isActive(),
-                getCategories().stream()
-                        .map(item -> CategoryID.load(item.getId().getCategoryId())).toList(),
+                getCategoryIDs(),
                 getCreatedAt(),
                 getUpdatedAt(),
                 getDeletedAt()
@@ -111,6 +113,11 @@ public class GenreJpaEntity {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public List<CategoryID> getCategoryIDs() {
+        return getCategories().stream()
+                .map(item -> CategoryID.load(item.getId().getCategoryId())).toList();
     }
 
     public Set<GenreCategoryJpaEntity> getCategories() {
