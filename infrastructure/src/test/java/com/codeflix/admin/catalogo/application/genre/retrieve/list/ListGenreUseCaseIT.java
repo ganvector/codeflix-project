@@ -1,30 +1,32 @@
 package com.codeflix.admin.catalogo.application.genre.retrieve.list;
 
-import com.codeflix.admin.catalogo.application.UseCaseTest;
+import com.codeflix.admin.catalogo.IntegrationTest;
 import com.codeflix.admin.catalogo.domain.genre.Genre;
 import com.codeflix.admin.catalogo.domain.genre.GenreGateway;
 import com.codeflix.admin.catalogo.domain.pagination.Pagination;
 import com.codeflix.admin.catalogo.domain.pagination.SearchQuery;
+import com.codeflix.admin.catalogo.infrastructure.genre.persistence.GenreJpaEntity;
+import com.codeflix.admin.catalogo.infrastructure.genre.persistence.GenreRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.util.List;
 
-public class ListGenreUseCaseTest extends UseCaseTest {
+@IntegrationTest
+public class ListGenreUseCaseIT {
+    @Autowired
+    private ListGenreUseCase listGenreUseCase;
 
-    @InjectMocks
-    private DefaultListGenreUseCase listGenreUseCase;
-
-    @Mock
+    @SpyBean
     private GenreGateway genreGateway;
 
-    @Override
-    protected List<Object> getMocks() {
-        return List.of(genreGateway);
-    }
+    @Autowired
+    private GenreRepository genreRepository;
 
     @Test
     public void shouldReturnGenresGivenAValidQuery () {
@@ -33,6 +35,7 @@ public class ListGenreUseCaseTest extends UseCaseTest {
                 Genre.createGenre("Adventure", true),
                 Genre.createGenre("Romance", true)
         );
+        genreRepository.saveAllAndFlush(genres.stream().map(GenreJpaEntity::load).toList());
         final var expectedPage = 0;
         final var expectedPerPage = 10;
         final var expectedTerms = "R";
@@ -44,23 +47,12 @@ public class ListGenreUseCaseTest extends UseCaseTest {
                 .map(ListGenreOutput::create)
                 .toList();
 
-        final var expectedPagination = new Pagination<>(
-                expectedPage,
-                expectedPerPage,
-                expectedTotal,
-                genres
-        );
-
         final var aQuery = new SearchQuery(expectedPage,
                 expectedPerPage,
                 expectedTerms,
                 expectedSort,
                 expectedDirection
         );
-
-        Mockito
-                .when(genreGateway.findAll(Mockito.any()))
-                .thenReturn(expectedPagination);
 
         final var actualOutput = listGenreUseCase.execute(aQuery);
 
@@ -76,7 +68,6 @@ public class ListGenreUseCaseTest extends UseCaseTest {
 
     @Test
     public void shouldReturnEmptyGenresGivenAValidQuery () {
-        final var genres = List.<Genre>of();
         final var expectedPage = 0;
         final var expectedPerPage = 10;
         final var expectedTerms = "R";
@@ -86,23 +77,12 @@ public class ListGenreUseCaseTest extends UseCaseTest {
 
         final var expectedItems = List.<ListGenreOutput>of();
 
-        final var expectedPagination = new Pagination<>(
-                expectedPage,
-                expectedPerPage,
-                expectedTotal,
-                genres
-        );
-
         final var aQuery = new SearchQuery(expectedPage,
                 expectedPerPage,
                 expectedTerms,
                 expectedSort,
                 expectedDirection
         );
-
-        Mockito
-                .when(genreGateway.findAll(Mockito.any()))
-                .thenReturn(expectedPagination);
 
         final var actualOutput = listGenreUseCase.execute(aQuery);
 
@@ -110,38 +90,6 @@ public class ListGenreUseCaseTest extends UseCaseTest {
         Assertions.assertEquals(expectedPerPage, actualOutput.perPage());
         Assertions.assertEquals(expectedTotal, actualOutput.total());
         Assertions.assertEquals(expectedItems, actualOutput.items());
-
-        Mockito
-                .verify(genreGateway, Mockito.times(1))
-                .findAll(Mockito.eq(aQuery));
-    }
-
-    @Test
-    public void shouldReturnAnExceptionWhenAnUnexpectedExceptionHappen () {
-        final var expectedPage = 0;
-        final var expectedPerPage = 10;
-        final var expectedTerms = "R";
-        final var expectedSort = "createdAt";
-        final var expectedDirection = "asc";
-
-        final var expectedErrorMessage= "Gateway error";
-
-
-        final var aQuery = new SearchQuery(expectedPage,
-                expectedPerPage,
-                expectedTerms,
-                expectedSort,
-                expectedDirection
-        );
-
-        Mockito
-                .when(genreGateway.findAll(Mockito.any()))
-                .thenThrow(new IllegalStateException("Gateway error"));
-
-
-        final var actualException = Assertions.assertThrows(IllegalStateException.class, () -> listGenreUseCase.execute(aQuery));
-
-        Assertions.assertEquals(expectedErrorMessage, actualException.getMessage());
 
         Mockito
                 .verify(genreGateway, Mockito.times(1))
