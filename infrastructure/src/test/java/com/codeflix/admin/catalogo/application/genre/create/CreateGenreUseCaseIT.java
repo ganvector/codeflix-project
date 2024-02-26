@@ -32,7 +32,7 @@ public class CreateGenreUseCaseIT {
     private GenreRepository genreRepository;
 
     @Autowired
-    private DefaultCreateGenreUseCase createGenreUseCase;
+    private CreateGenreUseCase createGenreUseCase;
 
     @Test
     public void shouldReturnGenreIdWhenCallCreateGenreWithValidInput() {
