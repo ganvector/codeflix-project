@@ -5,6 +5,8 @@ import com.codeflix.admin.catalogo.application.genre.create.CreateGenreOutput;
 import com.codeflix.admin.catalogo.application.genre.create.CreateGenreUseCase;
 import com.codeflix.admin.catalogo.application.genre.retrieve.get.GenreOutput;
 import com.codeflix.admin.catalogo.application.genre.retrieve.get.GetGenreByIdUseCase;
+import com.codeflix.admin.catalogo.application.genre.update.UpdateGenreOutput;
+import com.codeflix.admin.catalogo.application.genre.update.UpdateGenreUseCase;
 import com.codeflix.admin.catalogo.domain.category.CategoryID;
 import com.codeflix.admin.catalogo.domain.exceptions.NotFoundException;
 import com.codeflix.admin.catalogo.domain.exceptions.NotificationException;
@@ -13,6 +15,7 @@ import com.codeflix.admin.catalogo.domain.genre.GenreID;
 import com.codeflix.admin.catalogo.domain.validation.Error;
 import com.codeflix.admin.catalogo.domain.validation.handlers.Notification;
 import com.codeflix.admin.catalogo.infrastructure.genre.models.CreateGenreRequest;
+import com.codeflix.admin.catalogo.infrastructure.genre.models.UpdateGenreRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -42,6 +45,9 @@ public class GenreAPITest {
 
     @MockBean
     private GetGenreByIdUseCase getGenreByIdUseCase;
+
+    @MockBean
+    private UpdateGenreUseCase updateGenreUseCase;
 
     @Test
     public void shouldReturnGenreIdWhenCallingCreateGenreGivenAValidCommand() throws Exception {
@@ -158,5 +164,77 @@ public class GenreAPITest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.equalTo(expectedErrorMessage)));
 
         Mockito.verify(getGenreByIdUseCase).execute(Mockito.eq(expectedId.getValue()));
+    }
+
+    @Test
+    public void shouldReturnGenreIdWhenCallingUpdateGenreGivenAValidCommand() throws Exception {
+        final var expectedName = "Action";
+        final var expectedCategories = List.of("123", "456");
+        final var expectedIsActive = true;
+
+        final Genre aGenre = Genre.createGenre(expectedName, expectedIsActive).addCategories(expectedCategories.stream().map(CategoryID::load).toList());
+
+        final var expectedId = aGenre.getId().getValue();
+
+        final var aCommand = new UpdateGenreRequest(expectedName, expectedIsActive, expectedCategories);
+
+        Mockito.when(updateGenreUseCase.execute(Mockito.any()))
+                .thenReturn(UpdateGenreOutput.create(expectedId));
+
+        final var aRequest = MockMvcRequestBuilders.put("/genres/{id}", expectedId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(this.mapper.writeValueAsString(aCommand));
+
+        final var aResponse = this.mvc.perform(aRequest)
+                .andDo(MockMvcResultHandlers.print());
+
+        aResponse.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.header().string("Location", Matchers.nullValue()))
+                .andExpect(MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", Matchers.equalTo(expectedId)));
+
+        Mockito.verify(updateGenreUseCase).execute(Mockito.argThat(cmd ->
+                Objects.equals(expectedName, cmd.name())
+                        && Objects.equals(expectedCategories, cmd.categories())
+                        && Objects.equals(expectedIsActive, cmd.active())
+                        && Objects.equals(expectedId, cmd.id()))
+        );
+    }
+
+    @Test
+    public void shouldReturnNotificationWhenCallingUpdateGenreGivenAnInvalid() throws Exception {
+        final String expectedName = null;
+        final var expectedCategories = List.of("123", "456");
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "'name' should not be null";
+
+        final Genre aGenre = Genre.createGenre("Action", expectedIsActive).addCategories(expectedCategories.stream().map(CategoryID::load).toList());
+
+        final var expectedId = aGenre.getId().getValue();
+
+        final var aCommand = new UpdateGenreRequest(expectedName, expectedIsActive, expectedCategories);
+
+        Mockito.when(updateGenreUseCase.execute(Mockito.any()))
+                .thenThrow(new NotificationException("Error", Notification.create(new Error(expectedErrorMessage))));
+
+        final var aRequest = MockMvcRequestBuilders.put("/genres/{id}", expectedId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(this.mapper.writeValueAsString(aCommand));
+
+        final var aResponse = this.mvc.perform(aRequest)
+                .andDo(MockMvcResultHandlers.print());
+
+        aResponse.andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
+                .andExpect(MockMvcResultMatchers.header().string("Location", Matchers.nullValue()))
+                .andExpect(MockMvcResultMatchers.header().string("Content-Type", MediaType.APPLICATION_JSON.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errors", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errors[0].message", Matchers.equalTo(expectedErrorMessage)));
+
+        Mockito.verify(updateGenreUseCase).execute(Mockito.argThat(cmd ->
+                Objects.equals(expectedName, cmd.name())
+                        && Objects.equals(expectedCategories, cmd.categories())
+                        && Objects.equals(expectedIsActive, cmd.active())
+                        && Objects.equals(expectedId, cmd.id()))
+        );
     }
 }
