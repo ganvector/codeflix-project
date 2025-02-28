@@ -5,6 +5,9 @@ import com.codeflix.admin.catalogo.application.genre.create.CreateGenreOutput;
 import com.codeflix.admin.catalogo.application.genre.create.CreateGenreUseCase;
 import com.codeflix.admin.catalogo.application.genre.retrieve.get.GenreOutput;
 import com.codeflix.admin.catalogo.application.genre.retrieve.get.GetGenreByIdUseCase;
+import com.codeflix.admin.catalogo.application.genre.update.UpdateGenreCommand;
+import com.codeflix.admin.catalogo.application.genre.update.UpdateGenreOutput;
+import com.codeflix.admin.catalogo.application.genre.update.UpdateGenreUseCase;
 import com.codeflix.admin.catalogo.domain.pagination.Pagination;
 import com.codeflix.admin.catalogo.infrastructure.api.GenreAPI;
 import com.codeflix.admin.catalogo.infrastructure.genre.models.CreateGenreRequest;
@@ -21,10 +24,12 @@ import java.net.URI;
 public class GenreController implements GenreAPI {
     private final CreateGenreUseCase createGenreUseCase;
     private final GetGenreByIdUseCase getGenreByIdUseCase;
+    private final UpdateGenreUseCase updateGenreUseCase;
 
-    public GenreController(final CreateGenreUseCase createGenreUseCase,  final GetGenreByIdUseCase getGenreByIdUseCase) {
+    public GenreController(final CreateGenreUseCase createGenreUseCase,  final GetGenreByIdUseCase getGenreByIdUseCase, final UpdateGenreUseCase updateGenreUseCase) {
         this.createGenreUseCase = createGenreUseCase;
         this.getGenreByIdUseCase = getGenreByIdUseCase;
+        this.updateGenreUseCase = updateGenreUseCase;
     }
 
     @Override
@@ -47,7 +52,14 @@ public class GenreController implements GenreAPI {
 
     @Override
     public ResponseEntity<?> updateById(String anId, UpdateGenreRequest body) {
-        return null;
+        final UpdateGenreCommand command = UpdateGenreCommand.create(
+                anId,
+                body.name(),
+                body.active(),
+                body.categories()
+        );
+        UpdateGenreOutput output = this.updateGenreUseCase.execute(command);
+        return ResponseEntity.ok(output);
     }
 
     @Override
