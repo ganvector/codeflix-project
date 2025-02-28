@@ -15,7 +15,7 @@ public record GenreOutput(
         Instant updatedAt,
         Instant deletedAt
 ) {
-    public static GenreOutput create(final Genre aGenre) {
+    public static GenreOutput from(final Genre aGenre) {
         final var categoriesList = aGenre.getCategories().stream().map(CategoryID::getValue).toList();
         return new GenreOutput(
                 aGenre.getId().getValue(),
