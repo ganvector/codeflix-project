@@ -80,5 +80,5 @@ public interface GenreAPI {
             @ApiResponse(responseCode = "204", description = "Genre deleted successfully"),
             @ApiResponse(responseCode = "500", description = "An internal server error was thrown")
     })
-    void deleteById(@PathVariable(name = "id") final String anId);
+    ResponseEntity<Void> deleteById(@PathVariable(name = "id") final String anId);
 }
