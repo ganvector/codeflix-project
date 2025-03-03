@@ -1,7 +1,6 @@
 package com.codeflix.admin.catalogo.infrastructure.genre.models;
 
 import com.codeflix.admin.catalogo.JacksonTest;
-import com.codeflix.admin.catalogo.infrastructure.genre.models.CreateGenreRequest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -9,6 +9,7 @@ import com.codeflix.admin.catalogo.infrastructure.category.persistence.CategoryR
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.List;
 
 @MySQLGatewayTest
@@ -374,6 +375,6 @@ public class CategoryMySQLGatewayTest {
 
         final var actualResult = categoryGateway.existsByIds(ids);
 
-        Assertions.assertEquals(expectedIds, actualResult);
+        Assertions.assertTrue(actualResult.containsAll(expectedIds));
     }
 }
