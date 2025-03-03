@@ -8,6 +8,8 @@ import com.codeflix.admin.catalogo.infrastructure.category.models.CreateCategory
 import com.codeflix.admin.catalogo.infrastructure.category.models.UpdateCategoryRequest;
 import com.codeflix.admin.catalogo.infrastructure.config.json.Json;
 import com.codeflix.admin.catalogo.infrastructure.genre.models.CreateGenreRequest;
+import com.codeflix.admin.catalogo.infrastructure.genre.models.GenreResponse;
+import com.codeflix.admin.catalogo.infrastructure.genre.models.UpdateGenreRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -52,13 +54,39 @@ public interface MockDsl {
         return this.delete("/categories/", anId);
     }
 
+//  === GENRE ===
+
     default GenreID givenAGenre(final String aName, final boolean isActive, final List<CategoryID> categories) throws Exception {
         final var aRequestBody = new CreateGenreRequest(aName, isActive, categories.stream().map(CategoryID::getValue).toList());
         final var actualId = this.given("/genres", aRequestBody);
         return GenreID.load(actualId);
     }
 
-//    === PRIVATE METHODS ===
+    default ResultActions listGenres(final int page, final int perPage, final String search) throws Exception {
+        return list("/genres", page, perPage, search, "", "");
+    }
+
+    default ResultActions listGenres(final int page, final int perPage) throws Exception {
+        return list("/genres", page, perPage, "", "", "");
+    }
+
+    default ResultActions listGenres(final int page, final int perPage, final String search, final String sort, final String dir) throws Exception {
+        return list("/genres", page, perPage, search, sort, dir);
+    }
+
+    default GenreResponse retrieveGenre(final GenreID anId) throws Exception {
+        return this.retrieve("/genres/", anId,  GenreResponse.class);
+    }
+
+    default ResultActions updateGenre(final GenreID anId, final UpdateGenreRequest body) throws Exception {
+        return this.update("/genres/", anId, body);
+    }
+
+    default ResultActions deleteGenre(final GenreID anId) throws Exception {
+        return this.delete("/genres/", anId);
+    }
+
+//  === PRIVATE METHODS ===
 
     private String given(final String url, final Object body) throws Exception {
         final var aRequest = MockMvcRequestBuilders.post(url)
