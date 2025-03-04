@@ -7,7 +7,7 @@ import com.codeflix.admin.catalogo.domain.validation.handlers.Notification;
 
 import java.util.Objects;
 
-public final class DefaultCreateCastMemberUseCase extends CreateCastMemberUseCase {
+public non-sealed class DefaultCreateCastMemberUseCase extends CreateCastMemberUseCase {
 
     private final CastMemberGateway castMemberGateway;
 
