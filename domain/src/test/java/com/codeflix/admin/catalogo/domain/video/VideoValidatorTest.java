@@ -46,10 +46,9 @@ public class VideoValidatorTest {
                 expectedGenres,
                 expectedCastMembers
         );
-        final var validator = new VideoValidator(video, new ThrowsValidationHandler());
 
         // when
-        final var actualError = Assertions.assertThrows(DomainException.class, () -> validator.validate());
+        final var actualError = Assertions.assertThrows(DomainException.class, () -> video.validate(new ThrowsValidationHandler()));
 
         // then
         Assertions.assertEquals(expectedErrorCount, actualError.getErrors().size());
@@ -88,10 +87,9 @@ public class VideoValidatorTest {
                 expectedGenres,
                 expectedCastMembers
         );
-        final var validator = new VideoValidator(video, new ThrowsValidationHandler());
 
         // when
-        final var actualError = Assertions.assertThrows(DomainException.class, () -> validator.validate());
+        final var actualError = Assertions.assertThrows(DomainException.class, () -> video.validate(new ThrowsValidationHandler()));
 
         // then
         Assertions.assertEquals(expectedErrorCount, actualError.getErrors().size());
@@ -134,10 +132,9 @@ public class VideoValidatorTest {
                 expectedGenres,
                 expectedCastMembers
         );
-        final var validator = new VideoValidator(video, new ThrowsValidationHandler());
 
         // when
-        final var actualError = Assertions.assertThrows(DomainException.class, () -> validator.validate());
+        final var actualError = Assertions.assertThrows(DomainException.class, () -> video.validate(new ThrowsValidationHandler()));
 
         // then
         Assertions.assertEquals(expectedErrorCount, actualError.getErrors().size());
@@ -173,16 +170,16 @@ public class VideoValidatorTest {
                 expectedGenres,
                 expectedCastMembers
         );
-        final var validator = new VideoValidator(video, new ThrowsValidationHandler());
-
+        
         // when
-        final var actualError = Assertions.assertThrows(DomainException.class, () -> validator.validate());
+        final var actualError = Assertions.assertThrows(DomainException.class, () -> video.validate(new ThrowsValidationHandler()));
 
         // then
         Assertions.assertEquals(expectedErrorCount, actualError.getErrors().size());
         Assertions.assertEquals(expectedErrorMessage, actualError.getErrors().get(0).message());
     }
 
+    @Test
     public void givenDescriptionWithLengthGreaterThan4000_whenCallingValidate_shouldReceiveError() {
         //given
         final String expectedTitle = "The Blair Witch Project";
@@ -333,19 +330,19 @@ public class VideoValidatorTest {
                 expectedGenres,
                 expectedCastMembers
         );
-        final var validator = new VideoValidator(video, new ThrowsValidationHandler());
-
+        
         // when
-        final var actualError = Assertions.assertThrows(DomainException.class, () -> validator.validate());
+        final var actualError = Assertions.assertThrows(DomainException.class, () -> video.validate(new ThrowsValidationHandler()));
 
         // then
         Assertions.assertEquals(expectedErrorCount, actualError.getErrors().size());
         Assertions.assertEquals(expectedErrorMessage, actualError.getErrors().get(0).message());
     }
 
+    @Test
     public void givenNullLaunchedAt_whenCallingValidate_shouldReceiveError() {
         //given
-        final String expectedTitle = null;
+        final String expectedTitle = "The Blair Witch Project";
         final var expectedDescription = """
                 The Blair Witch Project (1999) follows three filmmakers who venture into the Maryland woods to 
                 investigate the Blair Witch legend. As strange events unfold, paranoia and fear take over, 
@@ -375,10 +372,9 @@ public class VideoValidatorTest {
                 expectedGenres,
                 expectedCastMembers
         );
-        final var validator = new VideoValidator(video, new ThrowsValidationHandler());
-
+        
         // when
-        final var actualError = Assertions.assertThrows(DomainException.class, () -> validator.validate());
+        final var actualError = Assertions.assertThrows(DomainException.class, () -> video.validate(new ThrowsValidationHandler()));
 
         // then
         Assertions.assertEquals(expectedErrorCount, actualError.getErrors().size());
@@ -418,10 +414,9 @@ public class VideoValidatorTest {
                 expectedGenres,
                 expectedCastMembers
         );
-        final var validator = new VideoValidator(video, new ThrowsValidationHandler());
-
+        
         // when
-        final var actualError = Assertions.assertThrows(DomainException.class, () -> validator.validate());
+        final var actualError = Assertions.assertThrows(DomainException.class, () -> video.validate(new ThrowsValidationHandler()));
 
         // then
         Assertions.assertEquals(expectedErrorCount, actualError.getErrors().size());
