@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -71,6 +72,11 @@ public class GenreMySQLGateway implements GenreGateway {
                 results.getTotalElements(),
                 results.map(GenreJpaEntity::toAggregate).toList()
         );
+    }
+
+    @Override
+    public List<GenreID> existsByIds(Iterable<GenreID> genreIDS) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private Genre save(final Genre aGenre) {
