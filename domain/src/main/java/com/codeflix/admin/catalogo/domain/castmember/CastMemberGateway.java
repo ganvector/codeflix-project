@@ -1,8 +1,10 @@
 package com.codeflix.admin.catalogo.domain.castmember;
 
+import com.codeflix.admin.catalogo.domain.category.CategoryID;
 import com.codeflix.admin.catalogo.domain.pagination.Pagination;
 import com.codeflix.admin.catalogo.domain.pagination.SearchQuery;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CastMemberGateway {
@@ -16,4 +18,6 @@ public interface CastMemberGateway {
     CastMember update(CastMember aCastMember);
 
     Pagination<CastMember> findAll(SearchQuery aQuery);
+
+    List<CastMemberID> existsByIds(Iterable<CastMemberID> castMemberIDS);
 }

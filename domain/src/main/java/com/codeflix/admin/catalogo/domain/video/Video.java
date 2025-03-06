@@ -150,7 +150,7 @@ public class Video extends AggregateRoot<VideoID> {
 
     @Override
     public void validate(final ValidationHandler handler) {
-
+        new VideoValidator(this, handler).validate();
     }
 
     public Video setVideo(final AudioVideoMedia audioVideoMedia) {

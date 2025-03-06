@@ -30,10 +30,12 @@ public class VideoValidator extends Validator {
         final String title = video.getTitle();
         if (title == null) {
             this.validationHandler().append(new Error("'title' should not be null"));
+            return;
         }
 
         if (title.isBlank()) {
             this.validationHandler().append(new Error("'title' should not be empty"));
+            return;
         }
 
         if (title.length() > TITLE_MAX_LENGTH) {
