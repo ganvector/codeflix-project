@@ -35,8 +35,8 @@ public class ListCastMembersUseCaseTest extends UseCaseTest {
     public void givenAValidQuery_whenCallsListCastMembers_shouldReturnAll() {
         // given
         final var members = List.of(
-                CastMember.create(Fixture.name(), Fixture.CastMember.type()),
-                CastMember.create(Fixture.name(), Fixture.CastMember.type())
+                CastMember.create(Fixture.name(), Fixture.CastMembers.type()),
+                CastMember.create(Fixture.name(), Fixture.CastMembers.type())
         );
 
         final var expectedPage = 0;
