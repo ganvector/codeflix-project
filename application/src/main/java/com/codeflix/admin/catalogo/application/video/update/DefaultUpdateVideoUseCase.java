@@ -1,0 +1,161 @@
+package com.codeflix.admin.catalogo.application.video.update;
+
+import com.codeflix.admin.catalogo.domain.Identifier;
+import com.codeflix.admin.catalogo.domain.castmember.CastMemberGateway;
+import com.codeflix.admin.catalogo.domain.castmember.CastMemberID;
+import com.codeflix.admin.catalogo.domain.category.CategoryGateway;
+import com.codeflix.admin.catalogo.domain.category.CategoryID;
+import com.codeflix.admin.catalogo.domain.exceptions.InternalErrorException;
+import com.codeflix.admin.catalogo.domain.exceptions.NotFoundException;
+import com.codeflix.admin.catalogo.domain.exceptions.NotificationException;
+import com.codeflix.admin.catalogo.domain.genre.GenreGateway;
+import com.codeflix.admin.catalogo.domain.genre.GenreID;
+import com.codeflix.admin.catalogo.domain.utils.CollectionUtils;
+import com.codeflix.admin.catalogo.domain.validation.Error;
+import com.codeflix.admin.catalogo.domain.validation.ValidationHandler;
+import com.codeflix.admin.catalogo.domain.validation.handlers.Notification;
+import com.codeflix.admin.catalogo.domain.video.*;
+
+import java.time.Year;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+public class DefaultUpdateVideoUseCase extends UpdateVideoUseCase{
+
+    private final CategoryGateway categoryGateway;
+    private final GenreGateway genreGateway;
+    private final CastMemberGateway castMemberGateway;
+    private final VideoGateway videoGateway;
+    private final MediaResourceGateway mediaResourceGateway;
+
+    public DefaultUpdateVideoUseCase(
+            final CategoryGateway categoryGateway,
+            final GenreGateway genreGateway,
+            final CastMemberGateway castMemberGateway,
+            final VideoGateway videoGateway,
+            final MediaResourceGateway mediaResourceGateway
+    ) {
+        this.categoryGateway = Objects.requireNonNull(categoryGateway);
+        this.genreGateway = Objects.requireNonNull(genreGateway);
+        this.castMemberGateway = Objects.requireNonNull(castMemberGateway);
+        this.videoGateway = Objects.requireNonNull(videoGateway);
+        this.mediaResourceGateway = Objects.requireNonNull(mediaResourceGateway);
+    }
+
+    @Override
+    public UpdateVideoOutput execute(UpdateVideoCommand command) {
+        final var videoId = VideoID.from(command.id());
+        final Rating aRating = Rating.from(command.rating())
+                .orElse(null);
+        final var launchedAt = command.launchedAt() != null ? Year.of(command.launchedAt()) : null;
+        final Set<CategoryID> categoryIds = CollectionUtils.toSet(command.categories(), CategoryID::load);
+        final Set<GenreID> genreIds = CollectionUtils.toSet(command.genres(), GenreID::load);
+        final Set<CastMemberID> castMemberIds = CollectionUtils.toSet(command.castMembers(), CastMemberID::load);
+
+        final var notification = Notification.create();
+        notification.append(validateCategories(categoryIds));
+        notification.append(validateGenres(genreIds));
+        notification.append(validateCastMembers(castMemberIds));
+
+        final Video video = videoGateway.findById(videoId)
+                .orElseThrow(() -> NotFoundException.raise(Video.class, videoId));
+
+        video.update(
+                command.title(),
+                command.description(),
+                launchedAt,
+                command.duration(),
+                aRating,
+                command.opened(),
+                command.published(),
+                categoryIds,
+                genreIds,
+                castMemberIds
+        );
+
+        video.validate(notification);
+
+        if (notification.hasError()) {
+            throw new NotificationException("Could not update Aggregate video", notification);
+        }
+
+        update(command, video);
+
+        return UpdateVideoOutput.from(video);
+    }
+
+    private ValidationHandler validateCategories(final Set<CategoryID> categoryIds) {
+        return validateAggregate("categories", categoryIds, categoryGateway::existsByIds);
+    }
+
+    private ValidationHandler validateGenres(final Set<GenreID> genreIds) {
+        return validateAggregate("genres", genreIds, genreGateway::existsByIds);
+    }
+
+    private ValidationHandler validateCastMembers(final Set<CastMemberID> castMemberIds) {
+        return validateAggregate("cast members", castMemberIds, castMemberGateway::existsByIds);
+    }
+
+    private Video update(final UpdateVideoCommand command, final Video aVideo) {
+        final var videoId = aVideo.getId();
+        try {
+
+            final var audioVideoMedia = command.getVideo()
+                    .map(it -> this.mediaResourceGateway.storeAudioVideo(videoId, it))
+                    .orElse(null);
+
+            final var trailerMedia = command.getTrailer()
+                    .map(it -> this.mediaResourceGateway.storeAudioVideo(videoId, it))
+                    .orElse(null);
+
+            final var bannerMedia = command.getBanner()
+                    .map(it -> this.mediaResourceGateway.storeImage(videoId, it))
+                    .orElse(null);
+
+            final var thumbnailMedia = command.getThumbnail()
+                    .map(it -> this.mediaResourceGateway.storeImage(videoId, it))
+                    .orElse(null);
+
+            final var thumbnailHalfMedia = command.getThumbnailHalf()
+                    .map(it -> this.mediaResourceGateway.storeImage(videoId, it))
+                    .orElse(null);
+
+            aVideo.setVideo(audioVideoMedia)
+                    .setTrailer(trailerMedia)
+                    .setBanner(bannerMedia)
+                    .setThumbnail(thumbnailMedia)
+                    .setThumbnailHalf(thumbnailHalfMedia);
+
+            return this.videoGateway.update(aVideo);
+        } catch (final Throwable t) {
+            throw InternalErrorException.with("An error on update video was observed [videoId:%s]".formatted(videoId.getValue()), t);
+        }
+    }
+
+    private <T extends Identifier> ValidationHandler validateAggregate(
+            final String aggregateName,
+            final Set<T> ids,
+            final Function<Iterable<T>, List<T>> existsByIds
+    ){
+        final Notification notification = Notification.create();
+        if (ids == null || ids.isEmpty()) {
+            return notification;
+        }
+
+        final List<T> existingIds = existsByIds.apply(ids);
+
+        if (ids.size() != existingIds.size()) {
+            final List<T> missingIds = new ArrayList<>(ids);
+            missingIds.removeAll(existingIds);
+
+            final String missingIdsMessage = missingIds.stream()
+                    .map(Identifier::getValue)
+                    .collect(Collectors.joining(", "));
+
+            notification.append(new Error("Some %s could not be found: %s".formatted(aggregateName, missingIdsMessage)));
+        }
+
+        return notification;
+    }
+}
